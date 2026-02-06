@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lavoro Pro">
+    <meta name="theme-color" content="#1a73e8">
+
+    <link rel="icon" type="image/png" href="https://i.ibb.co/0yCxc7hJ/logo.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/0yCxc7hJ/logo.png">
+
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkxhdm9ybyBQcm8iLAogICJzaG9ydF9uYW1lIjogIkxhdm9ybyIsCiAgInN0YXJ0X3VybCI6ICIuL2luZGV4Lmh0bWwiLAogICJzY29wZSI6ICIuLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2YwZjJmNSIsCiAgInRoZW1lX2NvbG9yIjogIiMxYTczZTgiLAogICJpZCI6ICIvaW5kZXguaHRtbCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vaS5pYmIuY28vMHlDeGM3aEovbG9nby5wbmciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9pLmliai5jby8weUN4YzdoSi9sb2dvLnBuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaHR0cHM6Ly9pLmliai5jby8weUN4YzdoSi9sb2dvLnBuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0KICBdCn0=">
+
+    <title>Lavoro Pro Cloud 2050</title>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; text-align: center; background: #f0f2f5; color: #333; margin: 0; padding-bottom: 50px; -webkit-tap-highlight-color: transparent; }
+        .app-header { background: #1a73e8; color: white; padding: env(safe-area-inset-top) 15px 10px 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; }
+        .header-content { display: flex; align-items: center; gap: 12px; }
+        .header-content img { height: 45px; width: 45px; border-radius: 10px; background: white; padding: 2px; object-fit: contain; }
+        .app-header h1 { margin: 0; font-size: 1.1rem; letter-spacing: 0.5px; }
+        #sync-status { font-size: 10px; color: #e8f0fe; opacity: 0.9; }
+        .btn-refresh { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        #controls { margin: 15px; background: white; display: inline-flex; align-items: center; gap: 10px; padding: 8px 20px; border-radius: 25px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; }
+        #calendar-container { max-width: 95%; margin: 0 auto; background: white; padding: 12px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        #week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; font-weight: bold; margin-bottom: 10px; color: #5f6368; font-size: 0.7rem; text-transform: uppercase; }
+        #calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .day { background: #fff; border: 1px solid #eee; border-radius: 10px; cursor: pointer; min-height: 75px; display: flex; flex-direction: column; font-size: 10px; overflow: hidden; position: relative; }
+        .day.paid { opacity: 0.4; text-decoration: line-through; filter: grayscale(1); }
+        .day-number { font-weight: bold; font-size: 13px; padding: 5px; background: #fafafa; border-bottom: 1px solid #f9f9f9; }
+        #formBox, #summaryBox, #annualBox { display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 420px; max-height: 85vh; background:white; z-index: 1000; padding: 25px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); text-align: left; overflow-y: auto; }
+        select, input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dadce0; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .invoice-row { background: #f8f9fa; padding: 10px; border-radius: 10px; margin-top: 5px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee; }
+        button { padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin: 5px 0; width: 100%; font-size: 14px; }
+        .btn-save { background: #1a73e8; color: white; }
+        .btn-copy { background: #f1f3f4; color: #1a73e8; border: 1px solid #1a73e8; }
+        .btn-delete { background: #fce8e6; color: #d93025; margin-top: 15px; }
+        .btn-close { background: #f1f3f4; color: #3c4043; }
+        .loading-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; justify-content:center; align-items:center; flex-direction: column; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1a73e8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th, td { padding: 10px 5px; text-align: left; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div id="loading" class="loading-overlay"><div class="spinner"></div><b style="color:#1a73e8">Sincronizzazione Cloud...</b></div>
+
+<div class="app-header">
+    <div class="header-content">
+        <img src="https://i.ibb.co/0yCxc7hJ/logo.png" alt="Logo">
+        <div><h1>Lavoro Pro</h1><div id="sync-status">Inizializzazione...</div></div>
+    </div>
+    <button class="btn-refresh" onclick="loadFromCloud()">🔄</button>
+</div>
+
+<div id="controls">
+    <select id="monthSelect"></select>
+    <select id="yearSelect"></select>
+</div>
+
+<div id="calendar-container">
+    <div id="week-days"><div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div></div>
+    <div id="calendar"></div>
+</div>
+
+<div style="padding: 20px 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+    <button class="btn-save" onclick="showSummary()">📊 Consuntivo</button>
+    <button class="btn-copy" onclick="showAnnualSummary()">📈 Statistiche</button>
+</div>
+
+<div id="formBox">
+    <h3 id="selectedDate" style="color:#1a73e8"></h3>
+    <label>Società</label><select id="client"></select>
+    <label>Location</label><select id="location"></select>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div><label>Inizio</label><select id="startTime"></select></div>
+        <div><label>Fine</label><select id="endTime"></select></div>
+    </div>
+    <label>Pausa</label><select id="lunchBreak"><option value="si">Sì</option><option value="no">No</option></select>
+    <div id="dayLiveRes" style="padding:10px; background:#e8f0fe; border-radius:10px; margin:10px 0; text-align:center; font-weight:bold;"></div>
+    <button class="btn-save" onclick="saveData()">💾 Salva</button>
+    <button class="btn-close" onclick="closeAll()">Annulla</button>
+    <button id="deleteBtn" class="btn-delete" onclick="deleteData()">🗑️ Elimina</button>
+</div>
+
+<div id="summaryBox">
+    <h3 id="summaryTitle" style="color:#1a73e8">Consuntivo</h3>
+    <div id="summaryContent"></div>
+    <button class="btn-save" style="background:#1d6f42; margin-top:20px;" onclick="exportCSV('tutti')">💾 Esporta CSV Mese (Tutti)</button>
+    <button class="btn-close" onclick="closeAll()">Chiudi</button>
+</div>
+
+<div id="annualBox">
+    <h3 id="annualTitle" style="color:#1a73e8">Statistiche Annuali</h3>
+    <div id="annualContent"></div>
+    <button class="btn-close" style="margin-top:20px;" onclick="closeAll()">Chiudi</button>
+</div>
+
+<script>
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyXnErX2Boa3_nAJgi1weV-Utx9WUPnZGuA9WV2_UwnQUpqJ2aNkK7YQeOKrgG8y-5d/exec";
+const companies = ["Anteprima Video","Airone","Av Set","B-Nomio","Centro Pilota","Ciccarelli","Dafral Soundvision","De Simoni","Digital Network","DHS","F.A.R.E. Servizi","Gruppo Planet","HRC","Ifet","Livon","Lvs","Milani group","Mondialtecnica","Niutek","Onegroup","Sincronismi","Studiovisio","TCS 2000","Tecnoconference Roma","Tecnomeeting","Vms"];
+const locations = ["Anantara","Angelicum","A. Roma Lifestyle","Acquario Romano","Auditorium P.d. Musica","Bernini Bristol","H. Massimo d'Azeglio","Cardo Roma","Chiostro Del Bramante","Don Giovanni (Praga)","Fao","Hotel Vanvitelli","Ergife Palace Hotel","Esperienza Europa","Eurostars Roma Aeterna","Fiera di Bologna","Hotel D. Camilla Savelli","H. Barcelò Mantegna","H. Bulgari","H. Dei Mellini","H. Le Merdien Visconti","H. Parco de Principi","Hotel Plaza","Holiday Inn Rome","H. Rome Airport","H. Rome Eur La Lama","H. Nazionale","H. Ripa","Hotel Villa Pamphili","Boutique Calzavecchio","MOMEC","Nhow","Nh Centro","Nh Villa Carpegna","Nh Giustiniano","La Nuvola","Palazzo dell'INPS","Parlamento Europeo Italia","Rome Marriot P.H.","Rome Cavalieri","Salone delle Fontane","S. Rome P. De' Medici","StarHotels Metropole","Starhotels Excelsior (Bo)","StarHotels Michelangelo (Fi)","Spazio 900","Spazio Sette Libreria","The Hive Hotel","The Westin Warsaw","The Westin Excelsior Rome","The St. Regis Rome","The Space Cinema Moderno","Tempio di Adriano","Villa Miani","Studio Curtis","Villa Madama"];
+const months = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+window.onload = () => { setupSelects(); loadFromCloud(); };
+
+function setupSelects() {
+    const mSel = document.getElementById("monthSelect"), ySel = document.getElementById("yearSelect");
+    companies.sort().forEach(c => document.getElementById("client").add(new Option(c, c)));
+    locations.sort().forEach(l => document.getElementById("location").add(new Option(l, l)));
+    months.forEach((m, i) => mSel.add(new Option(m, i)));
+    for(let y=2024; y<=2050; y++) ySel.add(new Option(y, y));
+    mSel.value = currentMonth; ySel.value = currentYear;
+    mSel.onchange = ySel.onchange = renderCalendar;
+    const sSel = document.getElementById("startTime"), eSel = document.getElementById("endTime");
+    for(let h=0; h<24; h++) ["00","30"].forEach(m => { let v=`${h.toString().padStart(2,'0')}:${m}`; sSel.add(new Option(v,v)); eSel.add(new Option(v,v)); });
+    document.querySelectorAll('#startTime, #endTime, #lunchBreak').forEach(el => el.onchange = updateLiveRes);
+}
+
+function getPaidKey(client) { return `PAID-${currentYear}-${currentMonth+1}-${client}`; }
+function isPaid(client) {
+    const data = JSON.parse(localStorage.getItem(getPaidKey(client)));
+    return data ? data.paid : false;
+}
+
+function renderCalendar() {
+    const cal = document.getElementById("calendar"); cal.innerHTML = "";
+    currentMonth = parseInt(document.getElementById("monthSelect").value);
+    currentYear = parseInt(document.getElementById("yearSelect").value);
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const offset = firstDay === 0 ? 6 : firstDay - 1;
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    for(let i=0; i<offset; i++) cal.appendChild(Object.assign(document.createElement("div"), {className: "day empty"}));
+    for(let i=1; i<=daysInMonth; i++) {
+        const key = `${currentYear}-${currentMonth+1}-${i}`, data = JSON.parse(localStorage.getItem(key)), div = document.createElement("div");
+        div.className = "day";
+        if(data && isPaid(data.client)) div.classList.add("paid");
+        div.onclick = () => openDay(i);
+        div.innerHTML = `<div class="day-number">${i}</div>`;
+        if(data) {
+            const color = getColor(data.client);
+            div.style.background = color;
+            div.style.borderLeft = `5px solid ${color.replace('85%','45%')}`;
+            div.innerHTML += `<div style="font-weight:bold; padding:2px;">${data.client.substring(0,10)}..</div>`;
