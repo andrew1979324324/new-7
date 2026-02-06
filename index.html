@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lavoro Pro">
+<meta name="theme-color" content="#1a73e8">
+
+<link rel="icon" type="image/png" href="https://i.ibb.co/0yCxc7hJ/logo.png">
+<link rel="apple-touch-icon" href="https://i.ibb.co/0yCxc7hJ/logo.png">
+
+<title>Lavoro Pro Cloud 2050</title>
+
+<style>
+body { font-family: system-ui; margin:0; background:#f0f2f5; }
+.app-header { background:#1a73e8; color:white; padding:15px; display:flex; justify-content:space-between; align-items:center; }
+#calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; padding:10px; }
+.day { background:white; border-radius:10px; min-height:80px; cursor:pointer; border:1px solid #eee; }
+.day-number { font-weight:bold; padding:4px; font-size:13px; }
+.day.copied { outline:3px dashed #1a73e8; animation:pulse 1s infinite; }
+
+@keyframes pulse {
+  0% { outline-offset:0 }
+  50% { outline-offset:4px }
+  100% { outline-offset:0 }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app-header">
+  <b>Lavoro Pro</b>
+  <span id="sync-status">OK</span>
+</div>
+
+<div id="calendar"></div>
+
+<script>
+const CLOUD_URL = "https://script.google.com/macros/s/AKfycbyXnErX2Boa3_nAJgi1weV-Utx9WUPnZGuA9WV2_UwnQUpqJ2aNkK7YQeOKrgG8y-5d/exec";
+const months = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+// 👉 NUOVO: copia/incolla nativo
+let copiedDayData = null;
+let longPressTimer = null;
+
+renderCalendar();
+
+function renderCalendar() {
+  const cal = document.getElementById("calendar");
+  cal.innerHTML = "";
+
+  const days = new Date(currentYear, currentMonth+1, 0).getDate();
+  const offset = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7;
+
+  for(let i=0;i<offset;i++) cal.appendChild(document.createElement("div"));
+
+  for(let i=1;i<=days;i++) {
+    const key = `${currentYear}-${currentMonth+1}-${i}`;
+    const data = JSON.parse(localStorage.getItem(key));
+    const div = document.createElement("div");
+    div.className = "day";
+
+    div.innerHTML = `<div class="day-number">${i}</div>`;
+    if(data) div.innerHTML += `<div style="font-size:11px;padding:4px">${data.client}</div>`;
+
+    // TAP
+    div.addEventListener("click", () => {
+      if(copiedDayData) pasteToDay(i);
+      else openDay(i);
+    });
+
+    // LONG PRESS
+    div.addEventListener("touchstart", () => startLongPress(i));
+    div.addEventListener("touchend", cancelLongPress);
+    div.addEventListener("touchmove", cancelLongPress);
+    div.addEventListener("mousedown", () => startLongPress(i));
+    div.addEventListener("mouseup", cancelLongPress);
+    div.addEventListener("mouseleave", cancelLongPress);
+
+    cal.appendChild(div);
+  }
+}
+
+function startLongPress(day) {
+  cancelLongPress();
+  longPressTimer = setTimeout(() => copyDay(day), 500);
+}
+
+function cancelLongPress() {
+  if(longPressTimer) clearTimeout(longPressTimer);
+  longPressTimer = null;
+}
+
+function copyDay(day) {
+  const key = `${currentYear}-${currentMonth+1}-${day}`;
+  const data = JSON.parse(localStorage.getItem(key));
+  if(!data) return;
+
+  copiedDayData = {...data};
+  navigator.vibrate?.(40);
+
+  document.querySelectorAll(".day").forEach(d=>d.classList.remove("copied"));
+  document.querySelectorAll(".day")[day-1].classList.add("copied");
+
+  document.getElementById("sync-status").innerText = "Giorno copiato 📋";
+}
+
+async function pasteToDay(day) {
+  const key = `${currentYear}-${currentMonth+1}-${day}`;
+  localStorage.setItem(key, JSON.stringify(copiedDayData));
+
+  copiedDayData = null;
+  document.querySelectorAll(".day").forEach(d=>d.classList.remove("copied"));
+
+  navigator.vibrate?.(30);
+  await syncToCloud();
+  renderCalendar();
+}
+
+function openDay(day) {
+  alert(`Apri giorno ${day}`);
+}
+
+async function syncToCloud() {
+  const db = {};
+  Object.keys(localStorage).forEach(k=>{
+    if(k.match(/^\d{4}-/)) db[k] = JSON.parse(localStorage.getItem(k));
+  });
+  await fetch(CLOUD_URL,{method:"POST",mode:"no-cors",body:JSON.stringify(db)});
+}
+</script>
+
+</body>
+</html>
